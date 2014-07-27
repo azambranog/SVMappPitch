@@ -1,0 +1,90 @@
+---
+title       : An App to Get Familiar with SVMs
+subtitle    : Assignment for the Data Products Course
+author      : A. Zambrano
+job         : 
+framework   : deckjs    # {io2012, html5slides, shower, dzslides, ...}
+highlighter : prettify  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+# An App to Get Familiar with SVMs. 
+<h3>Assignment for the Data Products Course</h3> 
+<h5>By: A. Zambrano (azambranog)</h5>
+
+---
+
+##  Motivation
+
+1. Support Vector Machines are widely used for classification.
+2. There are several types of support vector machines 
+3. To start and get familiar with possible classification surfaces of SVM it is nice to practice in simple examples.
+4. Use Shiny to create a simple app that can show SVMs in interesting training sets.
+
+--- .class #id 
+
+## Selecting and Plotting Sets
+
+- Select between three interesting sets.
+- Also possible to generate simple two points set and add points manually
+- Plot the generated data
+
+```{r, echo=FALSE}
+dataring <- function(nred,ngreen) {
+    if(nred <= 0) {
+        nred <- 1
+    }
+    if(ngreen <= 0) {
+        ngreen <- 1
+    }
+    
+    red <- matrix(rnorm(ceiling(nred)*2 , mean = 0, sd = 0.6), ceiling(nred) ,2)
+    green <- data.frame(a=rnorm(ceiling(ngreen),2,1),b=rnorm(ngreen,-2,1),
+                        c=rnorm(ceiling(ngreen),2,1),d=rnorm(ngreen,-2,1))
+    index <- sample(c(1,2),ceiling(ngreen),replace=T)
+    greenx <- green$a
+    greenx[index==2]<-green$b[index==2]
+    index <- sample(c(1,2),ceiling(ngreen),replace=T)
+    greeny <- green$c
+    greeny[index==2]<-green$d[index==2]
+    
+    points <- rbind(red, cbind(greenx,greeny))
+    y <- as.factor(matrix(c(rep("red",ceiling(nred)),rep("green",ceiling(ngreen)))))
+    return(data.frame(x = points[, 1], y = points[, 2], outcome = y))
+}
+```
+
+Function "dataring" is included to create a set with red points in the center and the app plots it
+
+```{r}
+data <- dataring(50, 300)
+plot(data$x, data$y, col = as.character(data$outcome), pch = 19, xlab = 'x', ylab = "y")
+```
+
+
+--- .class #id 
+
+
+## Modeling and Plotting 
+
+- Select between different types of kernel for the SVM.
+- When button is pressed a model is trained and automaticaly plotted
+
+The code to fit and plot the SVM is
+```{r}
+library(e1071)
+modFit <<- svm(outcome ~., data = data, kernel = "radial") 
+plot(modFit,data)
+```
+
+
+--- .class #id 
+
+## App Layout
+
+The app can be found in [my shiny apps webpage](http://azambranog.shinyapps.io/SVMapp/)
+
+![Appimage](menu1.jpg)
